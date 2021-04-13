@@ -23,20 +23,36 @@ def population_location():
     url = 'https://covid-api.mmediagroup.fr/v1/cases'
     request = requests.get(url)
     result = request.json()
+    complete = []
+    incomplete = []
     for country in result:
         countries = country
-        population = result['All']['population']
-        lat = countries['All']['lat']
-        long = countries['All']['long']
+        try:
+            population = result[countries]["All"]["population"]
+            latitude = result[countries]["All"]["lat"]
+            longitude = result[countries]["All"]["long"]
+            #print(countries + ": " + str(population) + " " +  str(latitude) + " " + str(longitude))
+            complete.append(countries)
+        except:
+            #print(countries + ": value(s) unavailable")
+            incomplete.append(countries)
+    print(complete)
+    print(incomplete)
+
 
 def testing():
     url = 'https://api.quarantine.country/api/v1/summary/latest'
     request = requests.get(url)
     result = request.json()
-    regions = result['data']['regions']
-    for x in regions:
-        testing = x['tested']
-    
+    for x in result:
+        test = result['data']['regions']
+        for x in test:
+            try:
+                tested = x['tested']
+            except:
+                print('No test info')
+    print(tested)
+
 
 def main():
     cases_deaths()
