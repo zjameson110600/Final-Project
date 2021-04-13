@@ -8,38 +8,39 @@ import os
 # By: Zita Jameson, Grace Coleman, Giselle Ciulla
 #
 
-def get_data_from_COVID19():
+def cases_deaths():
     url = 'https://coronavirus-19-api.herokuapp.com/countries'
     request = requests.get(url)
     result = request.json()
-    for c in result:
-        countries = c['country']
-        cases = c['cases']
-        deaths = c['deaths']
-        cases_per_mil = c['casesPerOneMillion']
-        deaths_per_mil = c['deathsPerOneMillion']
+    for country in result:
+        countries = country['country']
+        cases = country['cases']
+        deaths = country['deaths']
+        cases_per_mil = country['casesPerOneMillion']
+        deaths_per_mil = country['deathsPerOneMillion']
 
-def get_data_from_MEDIAGROUP():
+def population_location():
     url = 'https://covid-api.mmediagroup.fr/v1/cases'
     request = requests.get(url)
     result = request.json()
-    return result
+    for country in result:
+        countries = country
+        population = result['All']['population']
+        lat = countries['All']['lat']
+        long = countries['All']['long']
 
-def get_data_from_Q():
+def testing():
     url = 'https://api.quarantine.country/api/v1/summary/latest'
     request = requests.get(url)
     result = request.json()
-    for c in result['data']['regions']:
-        countries = c['name']
-        cases = c['total_cases']
-        deaths = c['deaths']
-        death_ratio = c['death_ratio']
-    print(result)
-
+    regions = result['data']['regions']
+    for x in regions:
+        testing = x['tested']
+    
 
 def main():
-    get_data_from_COVID19()
-    get_data_from_MEDIAGROUP()
-    get_data_from_Q()
+    cases_deaths()
+    population_location()
+    testing()
 
 main()
