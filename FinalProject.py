@@ -8,22 +8,32 @@ import os
 # By: Zita Jameson, Grace Coleman, Giselle Ciulla
 #
 
-def cases_deaths():
-    # returns cases, deaths, cases per mil, deaths per mil in each country
+def setupDatabase(db_name):
+    # Setup Database
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(path+'/'+db_name)
+    cur = conn.cursor()
+    return cur, ConnectionResetError
+
+
+def cases_deaths(cur, conn):
+    # gets data from api and puts into table
     url = 'https://coronavirus-19-api.herokuapp.com/countries'
     request = requests.get(url)
     result = request.json()
-    dict = {}
     for country in result:
         countries = country['country']
         cases = country['cases']
         deaths = country['deaths']
-    dict[countries] = [cases, deaths]
-    return dict
-    
+    cur.execute("DROP TABLE IF EXISTS Countries")
+    cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
+    for i in range(len(countries)):
+        cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(i, cases, deaths))
+    conn.commit()
 
-def population_location():
-    # returns population, longitude, latitude for each country
+
+def population_location(cur, conn):
+    # gets data from api and puts into table
     url = 'https://covid-api.mmediagroup.fr/v1/cases'
     request = requests.get(url)
     result = request.json()
@@ -33,12 +43,16 @@ def population_location():
         countries = country
         try:
             population = result[countries]["All"]["population"]
-            latitude = result[countries]["All"]["lat"]
-            longitude = result[countries]["All"]["long"]
+            lat = result[countries]["All"]["lat"]
+            long = result[countries]["All"]["long"]
             complete.append(countries)
         except:
             incomplete.append(countries)
-        return (countries, population, latitude, longitude)
+    cur.execute("DROP TABLE IF EXISTS Populations")
+    cur.execute("CREATE TABLE Populations (country TEXT PRIMARY KEY, population INTEGER, latitude INTEGER, longitude INTEGER)")
+    cur.execute("INSERT INTO Populations (country,population,latitude,longitude) VALUES (?,?,?)",(countries, population, lat, long))
+    conn.commit()
+
 
 def testing():
     # returns the amount of people tested in each country
@@ -54,29 +68,18 @@ def testing():
             except:
                 print('No test info')
         return (countries, tested)
-
-def setupDatabase(db_name):
-    # Setup Database
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(path+'/'+db_name)
-    cur = conn.cursor()
-    return cur, ConnectionResetError
-
-def create_countries_table(cur, conn):
-    # Setup countries in database
-    values = cases_deaths
-    country = values.keys()
-    for x in values.items():
-        cases = values.items()[0]
-        deaths = values.items()[1]
-    cur.execute("DROP TABLE IF EXISTS Countries")
-    cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
-    cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(country, cases, deaths))
+    cur.execute("DROP TABLE IF EXISTS Tested")
+    cur.execute("CREATE TABLE Tested (country TEXT PRIMARY KEY, population INTEGER, tested INTEGER)")
+    cur.execute("INSERT INTO Tested (country,population,latitude,longitude) VALUES (?,?,?)",(countries, population, tested))
     conn.commit()
+
+
 
 def main():
     cur, conn = setupDatabase('intnl_covid_rates.db')
-    create_countries_table(cur, conn)
+    cases_deaths(cur, conn)
+    population_location(cur, conn)
+    testing(cur, conn)
 
 if __name__ == '__main__':
     main()
