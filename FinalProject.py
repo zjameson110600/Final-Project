@@ -13,7 +13,7 @@ def setupDatabase(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
-    return cur, ConnectionResetError
+    return cur, conn
 
 
 def cases_deaths(cur, conn):
@@ -25,8 +25,8 @@ def cases_deaths(cur, conn):
         countries = country['country']
         cases = country['cases']
         deaths = country['deaths']
-    cur.execute("DROP TABLE IF EXISTS Countries")
-    cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
+        cur.execute("DROP TABLE IF EXISTS Countries")
+        cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
     cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(countries, cases, deaths))
     conn.commit()
 
@@ -44,12 +44,17 @@ def population_location(cur, conn):
             population = result[countries]["All"]["population"]
             lat = float(result[countries]["All"]["lat"])
             long = float(result[countries]["All"]["long"])
+            life_expect = float(result[countries]['All']["life_expectancy"])
             complete.append(countries)
         except:
             incomplete.append(countries)
     cur.execute("DROP TABLE IF EXISTS Populations")
     cur.execute("CREATE TABLE Populations (country TEXT PRIMARY KEY, population INTEGER, latitude FLOAT, longitude FLOAT)")
     cur.execute("INSERT INTO Populations (country,population,latitude,longitude) VALUES (?,?,?,?)",(countries, population, lat, long))
+    conn.commit()
+    cur.execute("DROP TABLE IF EXISTS Life_Expectancy")
+    cur.execute("CREATE TABLE Life_Expectancy (country TEXT PRIMARY KEY, life_expectancy FLOAT)")
+    cur.execute("INSERT INTO Life_Expectancy (country, life_expectancy) VALUES (?,?)", (countries, life_expect))
     conn.commit()
 
 
@@ -67,10 +72,8 @@ def testing(cur, conn):
             except:
                 print('No test info')
     cur.execute("DROP TABLE IF EXISTS Tested")
-    cur.execute("CREATE TABLE Tested (country TEXT PRIMARY KEY, population INTEGER, tested INTEGER)")
-    cur.execute("SELECT population FROM Countries WHERE title = ?", (population))
-    population = cur.fetchone()[0]
-    cur.execute("INSERT INTO Tested (country,population,latitude,longitude) VALUES (?,?,?)",(countries, population, tested))
+    cur.execute("CREATE TABLE Tested (country TEXT PRIMARY KEY, tested INTEGER)")
+    cur.execute("INSERT INTO Tested (country,tested) VALUES (?,?)",(countries,tested))
     conn.commit()
 
 
