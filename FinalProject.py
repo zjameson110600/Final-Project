@@ -42,14 +42,14 @@ def population_location(cur, conn):
         countries = country
         try:
             population = result[countries]["All"]["population"]
-            lat = result[countries]["All"]["lat"]
-            long = result[countries]["All"]["long"]
+            lat = float(result[countries]["All"]["lat"])
+            long = float(result[countries]["All"]["long"])
             complete.append(countries)
         except:
             incomplete.append(countries)
     cur.execute("DROP TABLE IF EXISTS Populations")
-    cur.execute("CREATE TABLE Populations (country TEXT PRIMARY KEY, population INTEGER, latitude INTEGER, longitude INTEGER)")
-    cur.execute("INSERT INTO Populations (country,population,latitude,longitude) VALUES (?,?,?)",(countries, population, lat, long))
+    cur.execute("CREATE TABLE Populations (country TEXT PRIMARY KEY, population INTEGER, latitude FLOAT, longitude FLOAT)")
+    cur.execute("INSERT INTO Populations (country,population,latitude,longitude) VALUES (?,?,?,?)",(countries, population, lat, long))
     conn.commit()
 
 
@@ -66,12 +66,12 @@ def testing(cur, conn):
                 tested = result['data']['regions'][x]['tested']
             except:
                 print('No test info')
-        return (countries, tested)
     cur.execute("DROP TABLE IF EXISTS Tested")
     cur.execute("CREATE TABLE Tested (country TEXT PRIMARY KEY, population INTEGER, tested INTEGER)")
+    cur.execute("SELECT population FROM Countries WHERE title = ?", (population))
+    population = cur.fetchone()[0]
     cur.execute("INSERT INTO Tested (country,population,latitude,longitude) VALUES (?,?,?)",(countries, population, tested))
     conn.commit()
-
 
 
 def main():
