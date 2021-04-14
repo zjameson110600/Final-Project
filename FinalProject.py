@@ -27,8 +27,7 @@ def cases_deaths(cur, conn):
         deaths = country['deaths']
     cur.execute("DROP TABLE IF EXISTS Countries")
     cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
-    for i in range(len(countries)):
-        cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(i, cases, deaths))
+    cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(countries, cases, deaths))
     conn.commit()
 
 
@@ -54,7 +53,7 @@ def population_location(cur, conn):
     conn.commit()
 
 
-def testing():
+def testing(cur, conn):
     # returns the amount of people tested in each country
     url = 'https://api.quarantine.country/api/v1/summary/latest'
     request = requests.get(url)
