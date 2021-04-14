@@ -13,14 +13,14 @@ def cases_deaths():
     url = 'https://coronavirus-19-api.herokuapp.com/countries'
     request = requests.get(url)
     result = request.json()
+    dict = {}
     for country in result:
         countries = country['country']
         cases = country['cases']
         deaths = country['deaths']
-        # cases_per_mil = country['casesPerOneMillion']
-        # deaths_per_mil = country['deathsPerOneMillion']
-        return (countries, cases, deaths)
-        print(countries, cases, deaths)
+    dict[countries] = [cases, deaths]
+    return dict
+    
 
 def population_location():
     # returns population, longitude, latitude for each country
@@ -60,24 +60,23 @@ def setupDatabase(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
+    return cur, ConnectionResetError
 
 def create_countries_table(cur, conn):
     # Setup countries in database
-    values = cases_deaths()
-    country = []
-    cases = []
-    deaths = []
-    for x in values:
-        country.append(x[0])
-        cases.append(x[1])
-        deaths.append(x[2])
+    values = cases_deaths
+    country = values.keys()
+    for x in values.items():
+        cases = values.items()[0]
+        deaths = values.items()[1]
     cur.execute("DROP TABLE IF EXISTS Countries")
     cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
     cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(country, cases, deaths))
     conn.commit()
 
 def main():
-    setupDatabase('intnl_covid_rates.db')
+    cur, conn = setupDatabase('intnl_covid_rates.db')
     create_countries_table(cur, conn)
 
-main()
+if __name__ == '__main__':
+    main()
