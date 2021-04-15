@@ -21,13 +21,12 @@ def cases_deaths(cur, conn):
     url = 'https://coronavirus-19-api.herokuapp.com/countries'
     request = requests.get(url)
     result = request.json()
-    cur.execute("DROP TABLE IF EXISTS Countries")
-    cur.execute("CREATE TABLE Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
     for country in result:
         countries = country['country']
         cases = country['cases']
         deaths = country['deaths']
-        cur.execute("INSERT INTO Countries (country,cases,deaths) VALUES (?,?,?)",(countries, cases, deaths))
+        cur.execute("INSERT OR REPLACE INTO Countries (country,cases,deaths) VALUES (?,?,?)", (countries, cases, deaths))
     conn.commit()
 
 
@@ -38,10 +37,8 @@ def population_location(cur, conn):
     result = request.json()
     complete = []
     incomplete = []
-    cur.execute("DROP TABLE IF EXISTS Populations")
-    cur.execute("CREATE TABLE Populations (country TEXT PRIMARY KEY, population INTEGER, latitude FLOAT, longitude FLOAT)")
-    cur.execute("DROP TABLE IF EXISTS Life_Expectancy")
-    cur.execute("CREATE TABLE Life_Expectancy (country TEXT PRIMARY KEY, life_expectancy FLOAT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Populations (country TEXT PRIMARY KEY, population INTEGER, latitude FLOAT, longitude FLOAT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Life_Expectancy (country TEXT PRIMARY KEY, life_expectancy FLOAT)")
     for country in result:
         countries = country
         try:
@@ -52,9 +49,9 @@ def population_location(cur, conn):
             complete.append(countries)
         except:
             incomplete.append(countries)
-        cur.execute("INSERT INTO Populations (country,population,latitude,longitude) VALUES (?,?,?,?)",(countries, population, lat, long))
+        cur.execute("INSERT OR REPLACE INTO Populations (country,population,latitude,longitude) VALUES (?,?,?,?)",(countries, population, lat, long))
     #conn.commit()
-        cur.execute("INSERT INTO Life_Expectancy (country, life_expectancy) VALUES (?,?)", (countries, life_expect))
+        cur.execute("INSERT OR REPLACE INTO Life_Expectancy (country, life_expectancy) VALUES (?,?)", (countries, life_expect))
     conn.commit()
 
 
@@ -63,22 +60,20 @@ def testing(cur, conn):
     url = 'https://api.quarantine.country/api/v1/summary/latest'
     request = requests.get(url)
     result = request.json()
-    cur.execute("DROP TABLE IF EXISTS Tested")
-    cur.execute("CREATE TABLE Tested (country TEXT PRIMARY KEY, tested INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Tested (country TEXT PRIMARY KEY, tested INTEGER)")
     for x in result:
         test = result['data']['regions']
-        countries = x
         for x in test:
-            try:
-                tested = result['data']['regions'][x]['tested']
-            except:
-                print('No test info')
-            cur.execute("INSERT INTO Tested (country, tested) VALUES (?,?)",(countries,tested))
+            countries = x
+            print(countries)
+            tested = test[x]['tested']
+            cur.execute("INSERT OR REPLACE INTO Tested (country, tested) VALUES (?,?)", (countries,tested))
+            #print(cur.rowcount)
     conn.commit()
 
 
 def main():
-    cur, conn = setupDatabase('intnl_covid_rates.db')
+    cur, conn = setupDatabase('test_intnl_covid_rates.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
