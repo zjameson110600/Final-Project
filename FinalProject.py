@@ -73,7 +73,7 @@ def testing(cur, conn):
                 tested = result['data']['regions'][x]['tested']
             except:
                 print('No test info')
-        cur.execute("INSERT INTO Tested (country,tested) VALUES (?,?)",(countries,tested))
+            cur.execute("INSERT INTO Tested (country, tested) VALUES (?,?)",(countries,tested))
     conn.commit()
 
 
