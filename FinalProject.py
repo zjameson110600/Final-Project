@@ -37,21 +37,38 @@ def population_location(cur, conn):
     result = request.json()
     complete = []
     incomplete = []
-    cur.execute("CREATE TABLE IF NOT EXISTS Populations (country TEXT PRIMARY KEY, population INTEGER, latitude FLOAT, longitude FLOAT)")
-    cur.execute("CREATE TABLE IF NOT EXISTS Life_Expectancy (country TEXT PRIMARY KEY, life_expectancy FLOAT)")
+    continents = {}
+    continent_list = []
+    none = []
+    #cur.execute("CREATE TABLE IF NOT EXISTS Populations (continent TEXT PRIMARY KEY, country TEXT,population INTEGER, latitude FLOAT, longitude FLOAT)")
+    #cur.execute("CREATE TABLE IF NOT EXISTS Continent Info (continent TEXT PRIMARY KEY, number_of_countries INTEGER)")
+    for country  in result:
+        for c in continent_list:
+            continents[c] = continents.get(c, 0) + 1
+    print(continents)
     for country in result:
+        values = continents.items()
         countries = country
+        try:
+            continent = result[countries]["All"]["continent"]
+            continent_list.append(continent)
+        except:
+            none.append(continent)
         try:
             population = result[countries]["All"]["population"]
             lat = float(result[countries]["All"]["lat"])
             long = float(result[countries]["All"]["long"])
-            life_expect = float(result[countries]['All']["life_expectancy"])
             complete.append(countries)
         except:
             incomplete.append(countries)
-        cur.execute("INSERT OR REPLACE INTO Populations (country,population,latitude,longitude) VALUES (?,?,?,?)",(countries, population, lat, long))
-    #conn.commit()
-        cur.execute("INSERT OR REPLACE INTO Life_Expectancy (country, life_expectancy) VALUES (?,?)", (countries, life_expect))
+        #cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
+        #asia = cur.execute("SELECT country FROM Populations WHERE country = 'Asia'")
+        #europe = cur.execute("SELECT country FROM Populations WHERE country = 'Europe'")
+        #south_america = cur.execute("SELECT country FROM Populations WHERE country = 'South America'")
+        #north_america = cur.execute("SELECT country FROM Populations WHERE country = 'North America'")
+        #africa = cur.execute("SELECT country FROM Populations WHERE country = 'Africa'")
+        #oceania = cur.execute("SELECT country FROM Populations WHERE country = 'Oceania'")
+        #cur.execute("INSERT OR REPLACE INTO Continent Info (continent, number_of_countries) VALUES (?,?)", (continent, values))
     conn.commit()
 
 
@@ -65,15 +82,13 @@ def testing(cur, conn):
         test = result['data']['regions']
         for x in test:
             countries = x
-            print(countries)
             tested = test[x]['tested']
             cur.execute("INSERT OR REPLACE INTO Tested (country, tested) VALUES (?,?)", (countries,tested))
-            #print(cur.rowcount)
     conn.commit()
 
 
 def main():
-    cur, conn = setupDatabase('test_intnl_covid_rates.db')
+    cur, conn = setupDatabase('intnl_covid_rates.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
