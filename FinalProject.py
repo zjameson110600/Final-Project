@@ -40,14 +40,9 @@ def population_location(cur, conn):
     continents = {}
     continent_list = []
     none = []
-    #cur.execute("CREATE TABLE IF NOT EXISTS Populations (continent TEXT PRIMARY KEY, country TEXT,population INTEGER, latitude FLOAT, longitude FLOAT)")
-    #cur.execute("CREATE TABLE IF NOT EXISTS Continent Info (continent TEXT PRIMARY KEY, number_of_countries INTEGER)")
-    for country  in result:
-        for c in continent_list:
-            continents[c] = continents.get(c, 0) + 1
-    print(continents)
+    cur.execute("CREATE TABLE IF NOT EXISTS Populations (continent TEXT PRIMARY KEY, country TEXT,population INTEGER, latitude FLOAT, longitude FLOAT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Continent_Info (continent TEXT PRIMARY KEY, number_of_countries INTEGER)")
     for country in result:
-        values = continents.items()
         countries = country
         try:
             continent = result[countries]["All"]["continent"]
@@ -61,14 +56,17 @@ def population_location(cur, conn):
             complete.append(countries)
         except:
             incomplete.append(countries)
-        #cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
-        #asia = cur.execute("SELECT country FROM Populations WHERE country = 'Asia'")
-        #europe = cur.execute("SELECT country FROM Populations WHERE country = 'Europe'")
-        #south_america = cur.execute("SELECT country FROM Populations WHERE country = 'South America'")
-        #north_america = cur.execute("SELECT country FROM Populations WHERE country = 'North America'")
-        #africa = cur.execute("SELECT country FROM Populations WHERE country = 'Africa'")
-        #oceania = cur.execute("SELECT country FROM Populations WHERE country = 'Oceania'")
-        #cur.execute("INSERT OR REPLACE INTO Continent Info (continent, number_of_countries) VALUES (?,?)", (continent, values))
+    for c in continent_list:
+        continents[c] = continents.get(c, 0) + 1
+        number_of_countries = continents[c]
+        cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
+        asia = cur.execute("SELECT country FROM Populations WHERE country = 'Asia'")
+        europe = cur.execute("SELECT country FROM Populations WHERE country = 'Europe'")
+        south_america = cur.execute("SELECT country FROM Populations WHERE country = 'South America'")
+        north_america = cur.execute("SELECT country FROM Populations WHERE country = 'North America'")
+        africa = cur.execute("SELECT country FROM Populations WHERE country = 'Africa'")
+        oceania = cur.execute("SELECT country FROM Populations WHERE country = 'Oceania'")
+        cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (continent, number_of_countries))
     conn.commit()
 
 
