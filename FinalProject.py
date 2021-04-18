@@ -56,17 +56,20 @@ def population_location(cur, conn):
             complete.append(countries)
         except:
             incomplete.append(countries)
+
+        cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
+
     for c in continent_list:
         continents[c] = continents.get(c, 0) + 1
         #number_of_countries = continents[c]
-    cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
+    #cur.execute("INSERT INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
         # asia = cur.execute("SELECT country FROM Populations WHERE continent = 'Asia'")
         # europe = cur.execute("SELECT country FROM Populations WHERE continent = 'Europe'")
         # south_america = cur.execute("SELECT country FROM Populations WHERE continent = 'South America'")
         # north_america = cur.execute("SELECT country FROM Populations WHERE continent = 'North America'")
         # africa = cur.execute("SELECT country FROM Populations WHERE continent = 'Africa'")
         # oceania = cur.execute("SELECT country FROM Populations WHERE continent = 'Oceania'")
-    cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (continent, continents[continent]))
+        #cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (continent, continents[continent]))
     conn.commit()
 
 
