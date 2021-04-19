@@ -3,6 +3,7 @@ import sqlite3
 import requests
 import json
 import os
+import csv
 
 #
 # By: Zita Jameson, Grace Coleman, Giselle Ciulla
@@ -21,12 +22,18 @@ def cases_deaths(cur, conn):
     url = 'https://coronavirus-19-api.herokuapp.com/countries'
     request = requests.get(url)
     result = request.json()
+    country_count = 0
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
     for country in result:
         countries = country['country']
         cases = country['cases']
         deaths = country['deaths']
-        cur.execute("INSERT OR REPLACE INTO Countries (country,cases,deaths) VALUES (?,?,?)", (countries, cases, deaths))
+        if country_count == 25:
+            break
+        if cur.execute("SELECT country FROM Countries WHERE country = ?", (countries,)).fetchone() == None:
+            cur.execute("INSERT OR REPLACE INTO Countries (country,cases,deaths) VALUES (?,?,?)", (countries, cases, deaths))
+            country_count += 1
+            continue
     conn.commit()
 
 
@@ -40,7 +47,8 @@ def population_location(cur, conn):
     continents = {}
     continent_list = []
     none = []
-    cur.execute("CREATE TABLE IF NOT EXISTS Populations (continent TEXT PRIMARY KEY, country TEXT, population INTEGER, latitude FLOAT, longitude FLOAT)")
+    pop_count = 0
+    cur.execute("CREATE TABLE IF NOT EXISTS Populations (country TEXT PRIMARY KEY, continent TEXT, population INTEGER, latitude FLOAT, longitude FLOAT)")
     cur.execute("CREATE TABLE IF NOT EXISTS Continent_Info (continent TEXT PRIMARY KEY, number_of_countries INTEGER)")
     for country in result:
         countries = country
@@ -56,20 +64,24 @@ def population_location(cur, conn):
             complete.append(countries)
         except:
             incomplete.append(countries)
-
-        cur.execute("INSERT OR REPLACE INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
-
+        if pop_count == 25:
+            break
+        if cur.execute("SELECT country FROM Populations WHERE country = ?", (countries,)).fetchone() == None:
+            cur.execute("INSERT OR REPLACE INTO Populations (country, continent, population, latitude, longitude) VALUES (?,?,?,?,?)",(countries, continent, population, lat, long))
+            pop_count += 1
+            continue
+    conn.commit()
     for c in continent_list:
         continents[c] = continents.get(c, 0) + 1
         #number_of_countries = continents[c]
-    #cur.execute("INSERT INTO Populations (continent, country, population, latitude, longitude) VALUES (?,?,?,?,?)",(continent, countries, population, lat, long))
-        # asia = cur.execute("SELECT country FROM Populations WHERE continent = 'Asia'")
-        # europe = cur.execute("SELECT country FROM Populations WHERE continent = 'Europe'")
-        # south_america = cur.execute("SELECT country FROM Populations WHERE continent = 'South America'")
-        # north_america = cur.execute("SELECT country FROM Populations WHERE continent = 'North America'")
-        # africa = cur.execute("SELECT country FROM Populations WHERE continent = 'Africa'")
-        # oceania = cur.execute("SELECT country FROM Populations WHERE continent = 'Oceania'")
-        #cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (continent, continents[continent]))
+    cont_count = 0
+    for i in continents:
+        if cont_count == 25:
+            break
+        if cur.execute("SELECT continent FROM Continent_Info WHERE continent = ?", (i[0],)).fetchone() == None:
+            cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (i, continents[i]))
+            cont_count += 1
+            continue
     conn.commit()
 
 
@@ -78,21 +90,40 @@ def testing(cur, conn):
     url = 'https://api.quarantine.country/api/v1/summary/latest'
     request = requests.get(url)
     result = request.json()
+    continent_count = 0
     cur.execute("CREATE TABLE IF NOT EXISTS Tested (country TEXT PRIMARY KEY, tested INTEGER)")
     for x in result:
         test = result['data']['regions']
         for x in test:
             countries = x
             tested = test[x]['tested']
-            cur.execute("INSERT OR REPLACE INTO Tested (country, tested) VALUES (?,?)", (countries,tested))
+            if continent_count == 25:
+                break
+            if cur.execute("SELECT continent FROM Continent_Info WHERE continent = ?", (x[0],)).fetchone() == None:
+                cur.execute("INSERT OR REPLACE INTO Tested (country, tested) VALUES (?,?)", (countries,tested))
+                continent_count += 1
+            continue
     conn.commit()
 
 
+def calculate_countries(cur, conn):
+    with open('calculations.csv', mode='w') as f:
+        writer = csv.writer(f, delimiter=',', quotechar='"')
+        countries = cur.execute("SELECT country FROM Countries")
+        cases = cur.execute("SELECT cases FROM Countries")
+        deaths = cur.execute("SELECT deaths FROM Countries")
+        death_rate = cases/deaths
+        writer.writerow(['Country', 'Cases', 'Deaths', 'Death Rate'])
+        for x in countries:
+            writer.writrow([x, cases, deaths, death_rate])
+
+
 def main():
-    cur, conn = setupDatabase('intnl_covid_rates.db')
+    cur, conn = setupDatabase('covid_d.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
+    calculate_countries(cur, conn)
 
 if __name__ == '__main__':
     main()
