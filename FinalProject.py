@@ -108,11 +108,13 @@ def testing(cur, conn):
 
 def calculate_countries(cur, conn):
     with open('calculations.csv', mode='w') as f:
-        writer = csv.writer(f, delimiter=',', quotechar='"')
+        writer = csv.writer(f)
         countries = cur.execute("SELECT country FROM Countries")
         cases = cur.execute("SELECT cases FROM Countries")
         deaths = cur.execute("SELECT deaths FROM Countries")
-        death_rate = cases/deaths
+        cur.fetchall()
+        for x in countries:
+            death_rate = cases/deaths
         writer.writerow(['Country', 'Cases', 'Deaths', 'Death Rate'])
         for x in countries:
             writer.writrow([x, cases, deaths, death_rate])
