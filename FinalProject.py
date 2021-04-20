@@ -106,30 +106,53 @@ def testing(cur, conn):
     conn.commit()
 
 
-
-
 def calculate_countries(cur, conn, filepath):
-
+    #calculates death rate and inserts data into csv
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
 
-    with open(filepath, 'w') as f:
-        writer = csv.writer(f, delimiter = ',')
-        countries = cur.execute("SELECT country FROM Countries")
-        cases = cur.execute("SELECT cases FROM Countries")
-        deaths = cur.execute("SELECT deaths FROM Countries")
-        cur.fetchall()
-        conn.commit()
-        for i in countries:
-            death_rate = cases/deaths
-            return death_rate
-        writer.writerow(['Country', 'Cases', 'Deaths', 'Death Rate'])
-        
-    #print(death_rate)
-    #return death_rate
+    data = cur.execute("SELECT country,cases,deaths FROM Countries").fetchall()
+    conn.commit()
 
-        
-    
+    with open(filepath, 'w') as f:
+        f = csv.writer(f, delimiter = ',')
+        for x in data:
+            try:
+                death_rate = (x[1]/x[2])
+            except:
+                death_rate = 0
+            all_data = (x[0], x[1], x[2], death_rate)
+            f.writerow(['Country', 'Cases', 'Deaths', 'Death Rate'])
+            f.writerow(all_data)
+
+def calculate_populations(cur, conn, filepath):
+    #calculates infection rate and inserts data into csv
+    source_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(source_dir, filepath)
+
+    distinct = cur.execute("SELECT Countries.country, Countries.cases, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country").fetchall()
+    conn.commit()
+
+    with open(filepath, 'w') as f:
+        f = csv.writer(f, delimiter = ',')
+        for x in distinct:
+            infection_rate = x[1]/x[2]
+            all_data = (x[0], x[2], x[1], infection_rate)
+            f.writerow(['Country', 'Population', 'Cases', 'Infection Rate'])
+            f.writerow(all_data)
+
+def calculate_testing(cur, conn, filepath):
+    #calculates testing rate per continent
+    source_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(source_dir, filepath)
+
+    testing = cur.execute("SELECT Populations.country, Populations.continent, Tested.country, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
+    conn.commit()
+
+    with open(filepath, 'w') as f:
+        f = csv.writer(f, delimiter = ',')
+        for x in tested:
+
 
 
 def main():
@@ -137,7 +160,9 @@ def main():
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
-    calculate_countries(cur, conn, 'calculations.csv')
+    calculate_countries(cur, conn, 'calculation_countries.csv')
+    calculate_populations(cur, conn, 'calculation_populations.csv')
+    calculate_testing(cur, conn, 'calculation_testing.csv')
 
 if __name__ == '__main__':
     main()
