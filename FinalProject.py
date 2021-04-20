@@ -106,13 +106,18 @@ def testing(cur, conn):
     conn.commit()
 
 
-def calculate_countries(cur, conn):
-    with open('calculations.csv', mode='w') as f:
-        writer = csv.writer(f)
+def calculate_countries(cur, conn, filepath):
+
+    source_dir = os.path.dirname(__file__)
+    full_path = os.path.join(source_dir, filepath)
+
+    with open(filepath, 'w', ) as f:
+        writer = csv.writer(f, delimiter = ',')
         countries = cur.execute("SELECT country FROM Countries")
         cases = cur.execute("SELECT cases FROM Countries")
         deaths = cur.execute("SELECT deaths FROM Countries")
         cur.fetchall()
+        conn.commit()
         for x in countries:
             death_rate = cases/deaths
         writer.writerow(['Country', 'Cases', 'Deaths', 'Death Rate'])
@@ -125,7 +130,7 @@ def main():
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
-    calculate_countries(cur, conn)
+    calculate_countries(cur, conn, 'calculations.csv')
 
 if __name__ == '__main__':
     main()
