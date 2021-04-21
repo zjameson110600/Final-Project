@@ -133,16 +133,23 @@ def calculate_testing(cur, conn, filepath):
     #calculates testing rate per country
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
-
-    testing = cur.execute("SELECT Populations.country, Populations.population, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
+    testing= cur.execute("SELECT tested FROM Tested")
+    #testing = cur.execute("SELECT Populations.country, Populations.population, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
     conn.commit()
     with open(filepath, "w") as f:
         f=csv.writer(f, delimiter= ",")
         for x in testing:
-            testing_rate= x[1]/x[2]
-            all_data= (x[0], x[2], x[1], testing_rate)
-            f.writerow(['Country', 'Population', 'Tested', "Testing Rate"])
+            world_tests= sum(x)
+            world_pop= 7444509223
+            world_rate= world_tests/world_pop
+            all_data= (x[0], world_rate)
+            f.writerow(["Tests", "World Test Rate"])
             f.writerow(all_data)
+        # for x in testing:
+        #     testing_rate= x[1]/x[2]
+        #     all_data= (x[0], x[1], x[2], testing_rate)
+        #     f.writerow(['Country', 'Population', 'Tested', "Testing Rate"])
+        #     f.writerow(all_data)
 
 
 
