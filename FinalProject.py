@@ -94,13 +94,12 @@ def testing(cur, conn):
                 cur.execute("INSERT OR REPLACE INTO Tested (country,tested) VALUES (?,?)", (countries,tested))
                 conn.commit()
                 continent = cur.execute("SELECT Populations.continent FROM Populations INNER JOIN Tested ON Tested.country = Populations.country").fetchall()
-                cur.execute("ALTER TABLE Tested ADD COLUMN continent")
                 cur.execute("INSERT OR REPLACE INTO Tested (continent) VALUES (?)", (continent))
                 conn.commit()
                 continent_count += 1
             continue
     conn.commit()
-
+    print(continent)
 
 def calculate_countries(cur, conn, filepath):
     #calculates death rate and inserts data into csv
