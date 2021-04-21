@@ -106,7 +106,7 @@ def calculate_countries(cur, conn, filepath):
         f = csv.writer(f, delimiter = ',')
         for x in data:
             try:
-                death_rate = (x[1]/x[2])
+                death_rate = (x[2]/x[1])
             except:
                 death_rate = 0
             all_data = (x[0], x[1], x[2], death_rate)
@@ -130,18 +130,18 @@ def calculate_populations(cur, conn, filepath):
             f.writerow(all_data)
 
 def calculate_testing(cur, conn, filepath):
-    #calculates testing rate per continent
+    #calculates testing rate per country
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
 
-    testing = cur.execute("SELECT Populations.country, Populations.continent, Tested.country, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
+    testing = cur.execute("SELECT Populations.country, Populations.population, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
     conn.commit()
     with open(filepath, "w") as f:
         f=csv.writer(f, delimiter= ",")
         for x in testing:
             testing_rate= x[1]/x[2]
             all_data= (x[0], x[2], x[1], testing_rate)
-            f.writerow(['Continent', 'Population', 'Tested', "Testing Rate"])
+            f.writerow(['Country', 'Population', 'Tested', "Testing Rate"])
             f.writerow(all_data)
 
 
