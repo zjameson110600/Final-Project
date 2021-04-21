@@ -78,23 +78,26 @@ def testing(cur, conn):
     request = requests.get(url)
     result = request.json()
     continent_count = 0
-    cur.execute("CREATE TABLE IF NOT EXISTS Tested (country TEXT PRIMARY KEY, continent TEXT, tested INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Tested (country TEXT PRIMARY KEY,tested INTEGER)")
     conn.commit()
     for x in result:
         test = result['data']['regions']
-        for t in test:
+        for x in test:
             continents = cur.execute("SELECT continent FROM Populations").fetchall()
             conn.commit()
-            countries = t
-            tested = test[t]['tested']
+            countries = test[x]['name']
+            tested = test[x]['tested']
             if continent_count == 25:
                 break
-            if cur.execute("SELECT continent FROM Populations WHERE continent = ?", (t[0],)).fetchone() == None:
-                continent = cur.execute("SELECT continent FROM Populations WHERE country = ?", (countries,))
-                for i in continent:
-                    cur.execute("INSERT OR REPLACE INTO Tested (country, continent, tested) VALUES (?,?,?)", (t,i,tested))
-                    conn.commit()
-                    continent_count += 1
+            if cur.execute("SELECT continent FROM Populations WHERE continent = ?", (x[0],)).fetchone() == None:
+                continent = cur.execute("SELECT continent FROM Populations WHERE country = ?", (x[0],))
+                cur.execute("INSERT OR REPLACE INTO Tested (country,tested) VALUES (?,?)", (countries,tested))
+                conn.commit()
+                continent = cur.execute("SELECT Populations.continent FROM Populations INNER JOIN Tested ON Tested.country = Populations.country").fetchall()
+                cur.execute("ALTER TABLE Tested ADD COLUMN continent")
+                cur.execute("INSERT OR REPLACE INTO Tested (continent) VALUES (?)", (continent))
+                conn.commit()
+                continent_count += 1
             continue
     conn.commit()
 
@@ -136,32 +139,25 @@ def calculate_populations(cur, conn, filepath):
 
 def calculate_testing(cur, conn, filepath):
     #calculates testing rate per country
-    source_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(source_dir, filepath)
+    # source_dir = os.path.dirname(os.path.abspath(__file__))
+    # file_path = os.path.join(source_dir, filepath)
 
-    testing = cur.execute("SELECT Tested.tested, Tested.country, Populations.country, Populations.continent FROM Populations INNER JOIN Tested ON Tested.country = Populations.country").fetchall()
-    conn.commit()
-
-    with open(filepath, "w") as f:
-        f = csv.writer(f, delimiter= ",")
-        for x in testing:
-            world_tests= sum(x)
-            world_pop= 7444509223
-            world_rate= world_tests/world_pop
-            all_data= (x[0], world_rate)
-            f.writerow(["Tests", "World Test Rate"])
-            f.writerow(all_data)
-        # for x in testing:
-        #     testing_rate= x[1]/x[2]
-        #     all_data= (x[0], x[1], x[2], testing_rate)
-        #     f.writerow(['Country', 'Population', 'Tested', "Testing Rate"])
-        #     f.writerow(all_data)
-
+    # testing = cur.execute("SELECT Tested.tested, Tested.country, Tested.continent, Populations.population FROM Tested INNER JOIN Populations ON Tested.country = Populations.country").fetchall()
+    # conn.commit()
+    # #tested, country, continent, population
+    # with open(filepath, "w") as f:
+    #     f = csv.writer(f, delimiter= ",")
+    #     for x in testing:
+    #         testing_rate_countries= x[0]/x[2]
+    #         all_data= (x[0], x[1], x[2], x[3], testing_rate)
+    #         f.writerow(['Tested', 'Country', 'Continent', 'Population' 'Testing Rate'])
+    #         f.writerow(all_data)
+    pass
 
 
 
 def main():
-    cur, conn = setupDatabase('covid.db')
+    cur, conn = setupDatabase('covid_datas.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
