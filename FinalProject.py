@@ -49,7 +49,6 @@ def population_location(cur, conn):
     none = []
     pop_count = 0
     cur.execute("CREATE TABLE IF NOT EXISTS Populations (country TEXT PRIMARY KEY, continent TEXT, population INTEGER, latitude FLOAT, longitude FLOAT)")
-    cur.execute("CREATE TABLE IF NOT EXISTS Continent_Info (continent TEXT PRIMARY KEY, number_of_countries INTEGER)")
     for country in result:
         countries = country
         try:
@@ -71,18 +70,7 @@ def population_location(cur, conn):
             pop_count += 1
             continue
     conn.commit()
-    for c in continent_list:
-        continents[c] = continents.get(c, 0) + 1
-        #number_of_countries = continents[c]
     cont_count = 0
-    for i in continents:
-        if cont_count == 25:
-            break
-        if cur.execute("SELECT continent FROM Continent_Info WHERE continent = ?", (i[0],)).fetchone() == None:
-            cur.execute("INSERT OR REPLACE INTO Continent_Info (continent, number_of_countries) VALUES (?,?)", (i, continents[i]))
-            cont_count += 1
-            continue
-    conn.commit()
 
 
 def testing(cur, conn):
@@ -149,9 +137,9 @@ def calculate_testing(cur, conn, filepath):
     testing = cur.execute("SELECT Populations.country, Populations.continent, Tested.country, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
     conn.commit()
 
-    with open(filepath, 'w') as f:
-        f = csv.writer(f, delimiter = ',')
-        for x in tested:
+    # with open(filepath, 'w') as f:
+    #     f = csv.writer(f, delimiter = ',')
+    #     for x in tested:
 
 
 
