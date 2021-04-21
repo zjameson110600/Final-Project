@@ -136,10 +136,14 @@ def calculate_testing(cur, conn, filepath):
 
     testing = cur.execute("SELECT Populations.country, Populations.continent, Tested.country, Tested.tested FROM Populations INNER JOIN Tested ON Populations.country = Tested.country").fetchall()
     conn.commit()
+    with open(filepath, "w") as f:
+        f=csv.writer(f, delimiter= ",")
+        for x in testing:
+            testing_rate= x[1]/x[2]
+            all_data= (x[0], x[2], x[1], testing_rate)
+            f.writerow(['Continent', 'Population', 'Tested', "Testing Rate"])
+            f.writerow(all_data)
 
-    # with open(filepath, 'w') as f:
-    #     f = csv.writer(f, delimiter = ',')
-    #     for x in tested:
 
 
 
