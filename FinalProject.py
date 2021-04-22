@@ -149,6 +149,7 @@ def calculate_testing(cur, conn, filepath):
             all_data= (x[1], x[2], x[0], x[3], testing_rate)
             f.writerow(all_data)
 
+#countries plot
 import matplotlib
 import matplotlib.pyplot as plt
 
