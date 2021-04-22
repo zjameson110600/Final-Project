@@ -158,12 +158,13 @@ d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
 d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
 
 fig, ax= plt.subplots()
-ax.plot(y, d1, label= "Cases")
-ax.plot(y, d2, label= "Deaths")
+ax.plot(y, d1, 'black', marker= (5,2), label= "Cases")
+ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
 ax.legend()
+plt.plot()
 ax.set_xlabel('Country')
 ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
-ax.set_title('Number of Cases and Deaths Per Country')
+ax.set_title('Covid Cases and Deaths Per Country')
 ax.grid()
 fig.savefig('test.png')
 plt.show()
