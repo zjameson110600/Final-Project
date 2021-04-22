@@ -124,8 +124,8 @@ def calculate_populations(cur, conn, filepath):
     #calculates infection rate and inserts data into csv
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
-
-    distinct = cur.execute("SELECT Countries.country, Countries.cases, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country").fetchall()
+  
+    distinct = cur.execute("SELECT Populations.country, Populations.population, Countries.cases FROM Populations INNER JOIN Countries ON Populations.country = Countries.country").fetchall()
     conn.commit()
 
     with open(filepath, 'w') as f:
