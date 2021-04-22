@@ -42,11 +42,7 @@ def population_location(cur, conn):
     url = 'https://covid-api.mmediagroup.fr/v1/cases'
     request = requests.get(url)
     result = request.json()
-    complete = []
-    incomplete = []
     continents = {}
-    continent_list = []
-    none = []
     pop_count = 0
     count = 0
     cur.execute("CREATE TABLE IF NOT EXISTS Populations (country TEXT PRIMARY KEY, country_id INTEGER, continent TEXT, population INTEGER, latitude FLOAT, longitude FLOAT)")
@@ -55,24 +51,21 @@ def population_location(cur, conn):
         countries = country
         try:
             continent = result[countries]["All"]["continent"]
-            continent_list.append(continent)
         except:
-            none.append(continent)
+            continue
         try:
             population = result[countries]["All"]["population"]
             lat = float(result[countries]["All"]["lat"])
             long = float(result[countries]["All"]["long"])
-            complete.append(countries)
         except:
-            incomplete.append(countries)
-        for x in complete:
-            if pop_count == 25:
-                break
-            if cur.execute("SELECT country FROM Countries WHERE country = ?", (x,)).fetchone() == None:
-                cur.execute("INSERT OR REPLACE INTO Populations (country, country_id, continent, population, latitude, longitude) VALUES (?,?,?,?,?,?)",(countries.lower(), count, continent, population, lat, long))
-                pop_count += 1
-                count += 1
-                continue
+            continue
+        if pop_count == 25:
+            break
+        if cur.execute("SELECT population FROM Populations WHERE population = ?", (population,)).fetchone() == None:
+            cur.execute("INSERT OR REPLACE INTO Populations (country, country_id, continent, population, latitude, longitude) VALUES (?,?,?,?,?,?)",(countries.lower(), count, continent, population, lat, long))
+            pop_count += 1
+            count += 1
+            continue
     conn.commit()
 
 
@@ -158,13 +151,14 @@ def calculate_testing(cur, conn, filepath):
 
 
 def main():
-    cur, conn = setupDatabase('covid7.db')
+    cur, conn = setupDatabase('covid11.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
     calculate_countries(cur, conn, 'calculation_countries.csv')
-    calculate_populations(cur, conn, 'calculation_populations.csv')
+    calculate_populations(cur, conn, 'calculation_population.csv')
     calculate_testing(cur, conn, 'calculation_testing.csv')
+
 
 if __name__ == '__main__':
     main()
