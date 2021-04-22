@@ -89,8 +89,8 @@ def testing(cur, conn):
             tested = test[x]['tested']
             if continent_count == 25:
                 break
-            if cur.execute("SELECT continent FROM Populations WHERE continent = ?", (x[0],)).fetchone() == None:
-                continent = cur.execute("SELECT continent FROM Populations WHERE country = ?", (x[0],))
+            if cur.execute("SELECT continent FROM Populations WHERE continent = ?", (x[0][0],)).fetchone() == None:
+                continent = cur.execute("SELECT continent FROM Populations WHERE country = ?", (x[0][0],))
                 cur.execute("INSERT OR REPLACE INTO Tested (country,tested) VALUES (?,?)", (countries,tested))
                 conn.commit()
                 continent = cur.execute("SELECT Populations.continent FROM Populations INNER JOIN Tested ON Tested.country = Populations.country").fetchall()
