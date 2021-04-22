@@ -25,7 +25,7 @@ def cases_deaths(cur, conn):
     country_count = 0
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (country TEXT PRIMARY KEY, cases INTEGER, deaths INTEGER)")
     for country in result:
-        countries = country['country']
+        countries = (country['country']).lower()
         cases = country['cases']
         deaths = country['deaths']
         if country_count == 25:
@@ -118,15 +118,16 @@ def calculate_populations(cur, conn, filepath):
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
   
-    distinct = cur.execute("SELECT Populations.country, Populations.population, Countries.cases FROM Populations INNER JOIN Countries ON Populations.country = Countries.country").fetchall()
+    distinct = cur.execute("SELECT Countries.cases, Populations.country, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country").fetchall()
     conn.commit()
-
+    print(distinct)
+    #cases, country, pop
     with open(filepath, 'w') as f:
         f = csv.writer(f, delimiter = ',')
         f.writerow(['Country', 'Population', 'Cases', 'Infection Rate'])
         for x in distinct:
-            infection_rate = x[1]/x[2]
-            all_data = (x[0], x[2], x[1], infection_rate)
+            infection_rate = x[0]/x[2]
+            all_data = (x[1], x[2], x[0], infection_rate)
             f.writerow(all_data)
 
 def calculate_testing(cur, conn, filepath):
@@ -151,13 +152,13 @@ def calculate_testing(cur, conn, filepath):
 
 
 def main():
-    cur, conn = setupDatabase('covid11.db')
+    cur, conn = setupDatabase('covid13.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
-    calculate_countries(cur, conn, 'calculation_countries.csv')
-    calculate_populations(cur, conn, 'calculation_population.csv')
-    calculate_testing(cur, conn, 'calculation_testing.csv')
+    calculate_countries(cur, conn, 'calculation_countriess.csv')
+    calculate_populations(cur, conn, 'calculation_populationss.csv')
+    calculate_testing(cur, conn, 'calculation_testings.csv')
 
 
 if __name__ == '__main__':
