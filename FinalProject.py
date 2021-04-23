@@ -1,9 +1,14 @@
+import matplotlib.pyplot as plt
+import plotly.express as px
+import pandas as pd
+import matplotlib
 import unittest
 import sqlite3
 import requests
 import json
-import os
+import dash
 import csv
+import os
 
 #
 # By: Zita Jameson, Grace Coleman, Giselle Ciulla
@@ -120,7 +125,6 @@ def calculate_populations(cur, conn, filepath):
   
     distinct = cur.execute("SELECT Countries.cases, Populations.country, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country").fetchall()
     conn.commit()
-    print(distinct)
     #cases, country, pop
     with open(filepath, 'w') as f:
         f = csv.writer(f, delimiter = ',')
@@ -149,27 +153,37 @@ def calculate_testing(cur, conn, filepath):
             all_data= (x[1], x[2], x[0], x[3], testing_rate)
             f.writerow(all_data)
 
-#countries plot
-import matplotlib
-import matplotlib.pyplot as plt
 
-y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
-d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
-d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
+def countries_plot():
+    #countries plot
+    y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
+    d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
+    d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
 
-fig, ax= plt.subplots()
-ax.plot(y, d1, 'black', marker= (5,2), label= "Cases")
-ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
-ax.legend()
-plt.plot()
-ax.set_xlabel('Country')
-ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
-ax.set_title('Covid Cases and Deaths Per Country')
-ax.grid()
-fig.savefig('test.png')
-plt.show()
+    fig, ax= plt.subplots()
+    ax.plot(y, d1, 'green', marker= (5,2), label= "Cases")
+    ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
+    ax.legend()
+    plt.plot()
+    ax.set_xlabel('Country')
+    ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
+    ax.set_title('Covid Cases and Deaths Per Country')
+    ax.grid()
+    fig.savefig('death_rate.png')
+    plt.show()
 
 
+def populations_plot():
+    from urllib.request import urlopen
+    with urlopen('http://inmagik.github.io/world-countries/countries.geojson') as response:
+        countries = json.load(response)
+        print(countries)
+    
+
+
+
+def testing_plot():
+    pass
 
 
 def main():
@@ -180,6 +194,10 @@ def main():
     calculate_countries(cur, conn, 'calculation_countriess.csv')
     calculate_populations(cur, conn, 'calculation_populationss.csv')
     calculate_testing(cur, conn, 'calculation_testings.csv')
+    #countries_plot()
+    populations_plot()
+    testing_plot()
+
 
 
 if __name__ == '__main__':
