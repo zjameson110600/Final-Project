@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 import plotly.express as px
-import pandas as pd
 import matplotlib
 import unittest
 import sqlite3
 import requests
 import json
-import dash
 import csv
 import os
 
@@ -155,7 +153,6 @@ def calculate_testing(cur, conn, filepath):
 
 
 def countries_plot():
-    #countries plot
     y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
     d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
     d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
@@ -173,11 +170,11 @@ def countries_plot():
     plt.show()
 
 
-def populations_plot():
-    from urllib.request import urlopen
-    with urlopen('http://inmagik.github.io/world-countries/countries.geojson') as response:
-        countries = json.load(response)
-        print(countries)
+# def populations_plot():
+#     from urllib.request import urlopen
+#     with urlopen('http://inmagik.github.io/world-countries/countries.geojson') as response:
+#         countries = json.load(response)
+#         print(countries)
     
 
 
@@ -195,8 +192,8 @@ def main():
     calculate_populations(cur, conn, 'calculation_populationss.csv')
     calculate_testing(cur, conn, 'calculation_testings.csv')
     #countries_plot()
-    populations_plot()
-    testing_plot()
+    #populations_plot()
+    #testing_plot()
 
 
 
