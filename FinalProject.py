@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import plotly.express as px
+import pandas as pd
 import matplotlib
 import unittest
 import sqlite3
@@ -102,7 +103,7 @@ def calculate_countries(cur, conn, filepath):
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
 
-    data = cur.execute("SELECT country,cases,deaths FROM Countries").fetchall()
+    data = cur.execute("SELECT country,cases,deaths FROM Countries ORDER BY country ASC").fetchall()
     conn.commit()
 
     with open(filepath, 'w') as f:
@@ -121,7 +122,7 @@ def calculate_populations(cur, conn, filepath):
     source_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(source_dir, filepath)
   
-    distinct = cur.execute("SELECT Countries.cases, Populations.country, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country").fetchall()
+    distinct = cur.execute("SELECT Countries.cases, Populations.country, Populations.population FROM Countries INNER JOIN Populations ON Countries.country = Populations.country ORDER BY Populations.country ASC").fetchall()
     conn.commit()
     #cases, country, pop
     with open(filepath, 'w') as f:
@@ -153,34 +154,39 @@ def calculate_testing(cur, conn, filepath):
 
 
 def countries_plot():
-    y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
-    d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
-    d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
+    df = pd.read_csv('calculation_countriess.csv')
+    fig = px.line(df, x = 'Country', y = 'Death Rate', title = 'COVID-19 Death Rate Per Country')
+    fig.update_xaxes(categoryorder='category ascending')
+    fig.show()
 
-    fig, ax= plt.subplots()
-    ax.plot(y, d1, 'green', marker= (5,2), label= "Cases")
-    ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
-    ax.legend()
-    plt.plot()
-    ax.set_xlabel('Country')
-    ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
-    ax.set_title('Covid Cases and Deaths Per Country')
-    ax.grid()
-    fig.savefig('death_rate.png')
-    plt.show()
+    #y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
+    #d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
+    #d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
 
-
-# def populations_plot():
-#     from urllib.request import urlopen
-#     with urlopen('http://inmagik.github.io/world-countries/countries.geojson') as response:
-#         countries = json.load(response)
-#         print(countries)
-    
+    # fig, ax= plt.subplots()
+    # ax.plot(y, d1, 'green', marker= (5,2), label= "Cases")
+    # ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
+    # ax.legend()
+    # plt.plot()
+    # ax.set_xlabel('Country')
+    # ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
+    # ax.set_title('Covid Cases and Deaths Per Country')
+    # ax.grid()
+    # fig.savefig('death_rate.png')
+    # plt.show()
 
 
+def populations_plot():
+    df = pd.read_csv('calculation_populationss.csv')
+    fig = px.line(df, x = 'Country', y = 'Infection Rate', title = 'COVID-19 Infection Rate Per Country')
+    fig.update_xaxes(categoryorder='category ascending')
+    fig.show()
 
 def testing_plot():
-    pass
+    df = pd.read_csv('calculation_testings.csv')
+    fig = px.line(df, x = 'Country', y = 'Testing Rate', title = 'COVID-19 Testing Rate Per Country')
+    fig.update_xaxes(categoryorder='category ascending')
+    fig.show()
 
 
 def main():
@@ -191,10 +197,9 @@ def main():
     calculate_countries(cur, conn, 'calculation_countriess.csv')
     calculate_populations(cur, conn, 'calculation_populationss.csv')
     calculate_testing(cur, conn, 'calculation_testings.csv')
-    #countries_plot()
-    #populations_plot()
-    #testing_plot()
-
+    countries_plot()
+    populations_plot()
+    testing_plot()
 
 
 if __name__ == '__main__':
