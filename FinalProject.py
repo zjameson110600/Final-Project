@@ -146,7 +146,7 @@ def calculate_testing(cur, conn, filepath):
         f.writerow(['Id', 'Country', 'Tested', 'Population','Testing Rate'])
         for x in testing:
             try:
-                testing_rate = x[3]/x[0]
+                testing_rate = x[0]/x[3]
             except:
                 testing_rate = 0
             all_data= (x[1], x[2], x[0], x[3], testing_rate)
