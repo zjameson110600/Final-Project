@@ -190,7 +190,7 @@ def testing_plot():
 
 
 def main():
-    cur, conn = setupDatabase('covid13.db')
+    cur, conn = setupDatabase('FinalCovid.db')
     cases_deaths(cur, conn)
     population_location(cur, conn)
     testing(cur, conn)
