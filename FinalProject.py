@@ -159,21 +159,7 @@ def countries_plot():
     fig.update_xaxes(categoryorder='category ascending')
     fig.show()
 
-    #y=['World', 'USA', 'India', 'Brazil', 'France', 'Russia', 'Turkey', 'UK']
-    #d1=[145285376, 32661870, 16257309, 14167973, 5408606, 4736121, 4501382, 4398431]
-    #d2=[3083565, 584169, 186928, 383502, 102164, 107103, 37329, 127345]
 
-    # fig, ax= plt.subplots()
-    # ax.plot(y, d1, 'green', marker= (5,2), label= "Cases")
-    # ax.plot(y, d2, 'red', marker= ">", label= "Deaths")
-    # ax.legend()
-    # plt.plot()
-    # ax.set_xlabel('Country')
-    # ax.set_ylabel('Number of Cases vs Number of Deaths in Millions')
-    # ax.set_title('Covid Cases and Deaths Per Country')
-    # ax.grid()
-    # fig.savefig('death_rate.png')
-    # plt.show()
 
 
 def populations_plot():
